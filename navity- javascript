@@ -1,0 +1,395 @@
+let coinAmount = 0;
+let currentQuestions = [];
+let currentIndex = 0;
+let quizTimer;
+let timeLeft = 20;
+
+const subjectData = {
+  Maths: { pic: "🧮", topics: ["Algebra", "Fractions", "Geometry"] },
+  English: { pic: "📖", topics: ["Grammar", "Spelling", "Reading"] },
+  Science: { pic: "💀", topics: ["Skeleton", "Forces", "Plants"] },
+  Geography: { pic: "🗺️", topics: ["Maps", "Countries", "Weather"] },
+  History: { pic: "🏛️", topics: ["Romans", "Greeks", "Vikings"] },
+  Languages: { pic: "🌍", topics: ["Spanish", "French", "Greetings"] },
+  ICT: { pic: "💻", topics: ["Coding", "Internet Safety", "Computers"] },
+  PSHE: { pic: "❤️", topics: ["Health", "Friendship", "Safety"] },
+  "Design Technology": { pic: "🛠️", topics: ["Materials", "Structures", "Circuits"] }
+};
+
+const ranks = ["Beginner", "CEO", "VIP", "Gold", "Expert", "Champion", "Emerald"];
+
+window.onload = function () {
+  enterBtn.onclick = enter;
+  startBtn.onclick = showSubjects;
+  arnavBtn.onclick = showArnav;
+  arnavImg.onclick = showArnav;
+  closeArnav.onclick = closeArnavPopup;
+  upgradeBtn.onclick = showUpgrade;
+  stopBtn.onclick = stopGame;
+
+  speak(welcomeText.innerText);
+};
+
+document.addEventListener("click", e => glitter(e.clientX, e.clientY));
+
+function speak(text) {
+  speechSynthesis.cancel();
+  const voice = new SpeechSynthesisUtterance(text);
+  voice.lang = "en-GB";
+  voice.rate = 0.9;
+  speechSynthesis.speak(voice);
+}
+
+function tickSound() {
+  const audio = new AudioContext();
+  const osc = audio.createOscillator();
+  const gain = audio.createGain();
+
+  osc.type = "square";
+  osc.frequency.value = 900;
+  gain.gain.value = 0.04;
+
+  osc.connect(gain);
+  gain.connect(audio.destination);
+
+  osc.start();
+  osc.stop(audio.currentTime + 0.06);
+}
+
+function enter() {
+  welcomePopup.classList.add("hidden");
+  bgMusic.play().catch(() => {});
+}
+
+function showArnav() {
+  arnavPopup.classList.remove("hidden");
+  speak("Hello, my name is Arnav. I created this app to improve people's learning and help them become better versions of themselves.");
+}
+
+function closeArnavPopup() {
+  arnavPopup.classList.add("hidden");
+}
+
+function hideAll() {
+  ["home", "subjectsPage", "topicsPage", "quizPage", "upgradePage"].forEach(id => {
+    document.getElementById(id).classList.add("hidden");
+  });
+}
+
+function showSubjects() {
+  enter();
+  hideAll();
+  subjectsPage.classList.remove("hidden");
+  subjectGrid.innerHTML = "";
+
+  Object.keys(subjectData).forEach(subject => {
+    const div = document.createElement("div");
+    div.className = "subjectCard";
+    div.innerHTML = `<span class="subjectPic">${subjectData[subject].pic}</span>${subject}`;
+    div.onclick = () => showTopics(subject);
+    subjectGrid.appendChild(div);
+  });
+}
+
+function showTopics(subject) {
+  hideAll();
+  topicsPage.classList.remove("hidden");
+  topicTitle.innerText = subject + " Topics";
+  topicGrid.innerHTML = "";
+
+  subjectData[subject].topics.forEach(topic => {
+    const div = document.createElement("div");
+    div.className = "topicCard";
+    div.innerHTML = `${topic}<br><small>50 different questions</small>`;
+    div.onclick = () => startQuiz(subject, topic);
+    topicGrid.appendChild(div);
+  });
+}
+
+function startQuiz(subject, topic) {
+  hideAll();
+  quizPage.classList.remove("hidden");
+  currentQuestions = make50Questions(subject, topic);
+  currentIndex = 0;
+  showQuestion();
+}
+
+function make50Questions(subject, topic) {
+  let list = [];
+
+  for (let i = 1; i <= 50; i++) {
+    let q, options, correct, why;
+
+    if (subject === "Maths") {
+      let a = i + 3;
+      let b = i + 7;
+      let x = i + 2;
+
+      if (topic === "Algebra") {
+        q = `Algebra Q${i}: If x + ${a} = ${x + a}, what is x?`;
+        correct = `${x}`;
+        options = [`${x}`, `${x + 1}`, `${x - 1}`, `${x + 3}`];
+        why = `${x + a} - ${a} = ${x}.`;
+      }
+
+      if (topic === "Fractions") {
+        q = `Fractions Q${i}: What is half of ${b * 2}?`;
+        correct = `${b}`;
+        options = [`${b}`, `${b + 2}`, `${b * 2}`, `${b - 1}`];
+        why = `Half means divide by 2. ${b * 2} ÷ 2 = ${b}.`;
+      }
+
+      if (topic === "Geometry") {
+        q = `Geometry Q${i}: A square has side ${i + 2} cm. What is its perimeter?`;
+        correct = `${(i + 2) * 4} cm`;
+        options = [`${(i + 2) * 4} cm`, `${(i + 2) * 2} cm`, `${(i + 2) * (i + 2)} cm`, `${i + 6} cm`];
+        why = `Perimeter of a square is 4 × side.`;
+      }
+    }
+
+    else if (subject === "English") {
+      const data = [
+        ["Which sentence uses a capital letter correctly?", "London is a city.", ["london is a city.", "London is a city.", "london Is a city.", "LONDON is a city."], "Names of places need capital letters."],
+        ["Which word is an adjective?", "brave", ["run", "brave", "table", "slowly"], "Brave describes a noun."],
+        ["Which word is a verb?", "whisper", ["whisper", "green", "castle", "quiet"], "Whisper is an action."],
+        ["Which punctuation ends an exclamation?", "!", ["?", ".", "!", ","], "An exclamation mark shows strong feeling."],
+        ["Which word is a synonym of big?", "large", ["tiny", "large", "slow", "thin"], "Large means big."]
+      ];
+      let d = data[(i - 1) % data.length];
+      q = `${topic} Q${i}: ${d[0]}`;
+      correct = d[1];
+      options = d[2];
+      why = d[3];
+    }
+
+    else if (subject === "Science") {
+      const data = [
+        ["What part of the body helps you breathe?", "Lungs", ["Heart", "Lungs", "Bones", "Teeth"], "Lungs help us breathe."],
+        ["What do roots take in from soil?", "Water", ["Light", "Water", "Fire", "Sound"], "Roots absorb water."],
+        ["What force slows objects when surfaces rub?", "Friction", ["Gravity", "Friction", "Light", "Sound"], "Friction slows movement."],
+        ["What is the Sun?", "A star", ["A planet", "A star", "A moon", "A cloud"], "The Sun is a star."],
+        ["What carries blood around the body?", "Blood vessels", ["Leaves", "Blood vessels", "Rocks", "Wires"], "Blood vessels carry blood."]
+      ];
+      let d = data[(i - 1) % data.length];
+      q = `${topic} Q${i}: ${d[0]}`;
+      correct = d[1];
+      options = d[2];
+      why = d[3];
+    }
+
+    else if (subject === "Geography") {
+      const data = [
+        ["What is a compass used for?", "Directions", ["Directions", "Cooking", "Reading time", "Drawing faces"], "A compass shows directions."],
+        ["What is the start of a river called?", "Source", ["Mouth", "Source", "Summit", "Valley"], "The source is where a river begins."],
+        ["What is weather?", "Daily condition of the air", ["Daily condition of the air", "A mountain", "A map", "A country"], "Weather is what the air is like each day."],
+        ["What is a continent?", "A large land area", ["A tiny road", "A large land area", "A river", "A shop"], "A continent is a huge area of land."],
+        ["What is the top of a mountain?", "Summit", ["Source", "Summit", "Beach", "Lake"], "The summit is the top."]
+      ];
+      let d = data[(i - 1) % data.length];
+      q = `${topic} Q${i}: ${d[0]}`;
+      correct = d[1];
+      options = d[2];
+      why = d[3];
+    }
+
+    else if (subject === "History") {
+      const data = [
+        ["What year was the Battle of Hastings?", "1066", ["1066", "1666", "1939", "2020"], "The Battle of Hastings happened in 1066."],
+        ["Who were the Vikings?", "Seafaring raiders and settlers", ["Robot builders", "Seafaring raiders and settlers", "Moon people", "Modern drivers"], "Vikings travelled by sea to raid, trade and settle."],
+        ["Who was Julius Caesar?", "A Roman leader", ["A Roman leader", "A Tudor queen", "A Viking child", "A Greek mountain"], "Julius Caesar was a Roman leader."],
+        ["What were pyramids used for?", "Tombs", ["Schools", "Tombs", "Roads", "Ships"], "Egyptian pyramids were tombs."],
+        ["What was rationing?", "Limiting food and supplies", ["Unlimited food", "Limiting food and supplies", "Building castles", "A Roman game"], "Rationing controlled scarce supplies."]
+      ];
+      let d = data[(i - 1) % data.length];
+      q = `${topic} Q${i}: ${d[0]}`;
+      correct = d[1];
+      options = d[2];
+      why = d[3];
+    }
+
+    else if (subject === "Languages") {
+      const data = [
+        ["How do you say blue in Spanish?", "Azul", ["Rojo", "Azul", "Verde", "Merci"], "Azul means blue."],
+        ["How do you say hello in French?", "Bonjour", ["Bonjour", "Hola", "Adios", "Uno"], "Bonjour means hello."],
+        ["How do you say goodbye in French?", "Au revoir", ["Merci", "Au revoir", "Rojo", "Dos"], "Au revoir means goodbye."],
+        ["How do you say one in Spanish?", "Uno", ["Uno", "Deux", "Trois", "Green"], "Uno means one."],
+        ["How do you say thank you in Spanish?", "Gracias", ["Gracias", "Bonjour", "Blue", "Adios"], "Gracias means thank you."]
+      ];
+      let d = data[(i - 1) % data.length];
+      q = `${topic} Q${i}: ${d[0]}`;
+      correct = d[1];
+      options = d[2];
+      why = d[3];
+    }
+
+    else if (subject === "ICT") {
+      const data = [
+        ["What is an algorithm?", "Step-by-step instructions", ["Step-by-step instructions", "A picture", "A keyboard", "A song"], "An algorithm is a set of steps."],
+        ["What is a browser used for?", "Opening websites", ["Opening websites", "Eating food", "Charging shoes", "Making tea"], "A browser opens websites."],
+        ["What is an input device?", "Keyboard", ["Monitor", "Speaker", "Keyboard", "Printer"], "A keyboard enters information."],
+        ["What is a file?", "Saved work or data", ["Saved work or data", "A chair", "A cloud in the sky", "A pencil"], "A file stores work or data."],
+        ["What does debugging mean?", "Finding and fixing code mistakes", ["Breaking computers", "Finding and fixing code mistakes", "Drawing", "Printing"], "Debugging fixes errors."]
+      ];
+      let d = data[(i - 1) % data.length];
+      q = `${topic} Q${i}: ${d[0]}`;
+      correct = d[1];
+      options = d[2];
+      why = d[3];
+    }
+
+    else if (subject === "PSHE") {
+      const data = [
+        ["What is kindness?", "Helping and caring for others", ["Ignoring people", "Helping and caring for others", "Shouting", "Pushing"], "Kindness means caring actions."],
+        ["Why should we wash hands?", "To stop germs spreading", ["To stop germs spreading", "To make noise", "To waste water", "To hide"], "Handwashing reduces germs."],
+        ["What is consent?", "Permission", ["Permission", "A snack", "A game", "A colour"], "Consent means permission."],
+        ["What is a need?", "Something necessary", ["Something necessary", "A luxury", "A toy only", "A wish"], "Needs are important things we require."],
+        ["What should you do in an emergency?", "Stay calm and get help", ["Stay calm and get help", "Hide forever", "Laugh", "Run into danger"], "Getting help keeps people safe."]
+      ];
+      let d = data[(i - 1) % data.length];
+      q = `${topic} Q${i}: ${d[0]}`;
+      correct = d[1];
+      options = d[2];
+      why = d[3];
+    }
+
+    else {
+      const data = [
+        ["What is a design brief?", "A short statement of what to make", ["A short statement of what to make", "A food", "A song", "A colour"], "A design brief explains the task."],
+        ["Why test a product?", "To find what works and what needs changing", ["To find what works and what needs changing", "To hide it", "To break it only", "To avoid learning"], "Testing improves designs."],
+        ["Which tool can cut paper?", "Scissors", ["Glue", "Scissors", "Paint", "Tape"], "Scissors cut paper."],
+        ["What is recycling?", "Turning used materials into new ones", ["Throwing everything away", "Turning used materials into new ones", "Burning homework", "Painting walls"], "Recycling reuses materials."],
+        ["What is a gear?", "A toothed wheel", ["A toothed wheel", "A battery", "A wire", "A fabric"], "Gears transfer movement."]
+      ];
+      let d = data[(i - 1) % data.length];
+      q = `${topic} Q${i}: ${d[0]}`;
+      correct = d[1];
+      options = d[2];
+      why = d[3];
+    }
+
+    list.push({ q, options, correct, why });
+  }
+
+  return list;
+}
+
+function showQuestion() {
+  clearInterval(quizTimer);
+
+  if (currentIndex >= currentQuestions.length) {
+    coinAmount += 50;
+    updateCoins();
+    alert("Quiz finished! You earned bonus coins.");
+    goHome();
+    return;
+  }
+
+  const q = currentQuestions[currentIndex];
+  question.innerText = q.q;
+  answers.innerHTML = "";
+
+  q.options.sort(() => Math.random() - 0.5).forEach(option => {
+    const btn = document.createElement("button");
+    btn.className = "answerBtn";
+    btn.innerText = option;
+    btn.onclick = () => checkAnswer(option);
+    answers.appendChild(btn);
+  });
+
+  speak(q.q);
+  startTimer();
+}
+
+function startTimer() {
+  timeLeft = 20;
+  timerText.innerText = timeLeft;
+  loadingFill.style.width = "100%";
+
+  quizTimer = setInterval(() => {
+    timeLeft--;
+    tickSound();
+
+    timerText.innerText = timeLeft;
+    loadingFill.style.width = (timeLeft * 5) + "%";
+
+    if (timeLeft <= 0) {
+      clearInterval(quizTimer);
+      checkAnswer("TIME OUT");
+    }
+  }, 1000);
+}
+
+function checkAnswer(answer) {
+  clearInterval(quizTimer);
+
+  const q = currentQuestions[currentIndex];
+
+  if (answer === q.correct) {
+    coinAmount += 10;
+    updateCoins();
+    result.className = "correct";
+    result.innerHTML = "Correct! ✨";
+    speak("Correct!");
+  } else {
+    result.className = "wrong";
+    result.innerHTML = `Incorrect ❌<br><br>Correct answer: ${q.correct}<br><br>Why: ${q.why}`;
+    speak("Incorrect. The correct answer is " + q.correct + ". " + q.why);
+  }
+
+  setTimeout(() => {
+    result.className = "hidden";
+    currentIndex++;
+    showQuestion();
+  }, 3000);
+}
+
+function updateCoins() {
+  coinText.innerText = coinAmount;
+}
+
+function showUpgrade() {
+  hideAll();
+  upgradePage.classList.remove("hidden");
+  rankBox.innerHTML = "";
+
+  ranks.forEach((rank, index) => {
+    let need = index * 200;
+    let div = document.createElement("div");
+    div.className = "rankCard";
+
+    if (coinAmount >= need) {
+      div.classList.add("unlocked");
+      div.innerText = `✅ ${rank} unlocked at ${need} coins`;
+    } else {
+      div.innerText = `🔒 ${rank} unlocks at ${need} coins`;
+    }
+
+    rankBox.appendChild(div);
+  });
+}
+
+function goHome() {
+  clearInterval(quizTimer);
+  hideAll();
+  home.classList.remove("hidden");
+}
+
+function stopGame() {
+  clearInterval(quizTimer);
+  bgMusic.pause();
+  speechSynthesis.cancel();
+  goHome();
+}
+
+function glitter(x, y) {
+  for (let i = 0; i < 8; i++) {
+    const spark = document.createElement("div");
+    spark.className = "spark";
+    spark.style.left = x + "px";
+    spark.style.top = y + "px";
+    spark.style.setProperty("--x", Math.random() * 80 - 40 + "px");
+    spark.style.setProperty("--y", Math.random() * 80 - 40 + "px");
+    document.body.appendChild(spark);
+    setTimeout(() => spark.remove(), 700);
+  }
+}
