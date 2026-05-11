@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Navity Quest</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<audio id="bgMusic" loop>
+  <source src="michael-jackson.mp3" type="audio/mpeg">
+</audio>
+
+<div id="welcomePopup" class="popup">
+  <div class="popupBox">
+    <h1>🔥 Welcome to Navity 🔥</h1>
+    <p id="welcomeText">Welcome to Navity where you will do loads of fun quizzes and achieve anything. Hop on and enjoy the quest.</p>
+    <button id="enterBtn">Enter</button>
+  </div>
+</div>
+
+<div id="arnavPopup" class="popup hidden">
+  <div class="popupBox">
+    <img src="arnav.png" class="bigPic">
+    <h2>Hello, my name is Arnav</h2>
+    <p>I created this app to improve people's learning and help them become better versions of themselves.</p>
+    <button id="closeArnav">Close</button>
+  </div>
+</div>
+
+<header>
+  <h1>⚡ Navity Quest ⚡</h1>
+  <div>
+    Coins: <span id="coinText">0</span> 🪙
+    <button id="stopBtn">STOP</button>
+  </div>
+</header>
+
+<section id="home">
+  <div class="card">
+    <img src="arnav.png" id="arnavImg">
+    <button id="arnavBtn">Talk to Arnav</button>
+  </div>
+
+  <div class="card">
+    <img src="star.png" class="star">
+    <button id="startBtn">Start the Quest</button>
+  </div>
+
+  <div class="upgrade" id="upgradeBtn">🏆 Upgrade</div>
+</section>
+
+<section id="subjectsPage" class="hidden page">
+  <h2>Choose Subject</h2>
+  <div id="subjectGrid" class="grid"></div>
+</section>
+
+<section id="topicsPage" class="hidden page">
+  <h2 id="topicTitle"></h2>
+  <div id="topicGrid" class="grid"></div>
+</section>
+
+<section id="quizPage" class="hidden page">
+  <h2 id="question"></h2>
+  <div id="timerText">20</div>
+
+  <div class="loadingBar">
+    <div id="loadingFill"></div>
+  </div>
+
+  <div id="answers"></div>
+</section>
+
+<section id="upgradePage" class="hidden page">
+  <h2>Upgrade Ladder</h2>
+  <p>Every 200 coins unlocks a new rank.</p>
+  <div id="rankBox"></div>
+  <button onclick="goHome()">Back</button>
+</section>
+
+<div id="result" class="hidden"></div>
+
+<script src="script.js"></script>
+</body>
+</html>
